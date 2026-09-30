@@ -1,1 +1,1 @@
-echo "Webhook test" >> test.txt
+echo "Webhook test" 
