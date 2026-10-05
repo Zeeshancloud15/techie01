@@ -10,17 +10,19 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexus-creid"
     }
 
-    tools {
-        maven 'Maven'
-        jdk 'JDK21'
-    }
-
     stages {
 
         stage('Checkout') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/Zeeshancloud15/techie01.git'
+            }
+        }
+
+        stage('Check Java and Maven') {
+            steps {
+                sh 'java -version'
+                sh 'mvn -version'
             }
         }
 
@@ -67,7 +69,8 @@ pipeline {
 
         failure {
             echo 'BUILD FAILED'
-            echo 'Check the Jenkins console output'
+            echo 'Check the console output'
         }
     }
 }
+
