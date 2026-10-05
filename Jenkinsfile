@@ -61,18 +61,13 @@ pipeline {
 
     post {
         success {
-            echo '========================================'
             echo 'BUILD SUCCESSFUL'
             echo 'WAR uploaded to Nexus successfully'
-            echo '========================================'
         }
 
         failure {
-            echo '========================================'
             echo 'BUILD FAILED'
             echo 'Check the Jenkins console output'
-            echo '========================================'
         }
     }
 }
-```
