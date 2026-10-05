@@ -1,17 +1,16 @@
+```groovy
 pipeline {
 
     agent any
 
     environment {
+        PATH = "/opt/maven/bin:${env.PATH}"
+
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "100.62.106.141:8081"
         NEXUS_REPOSITORY = "maven-release"
         NEXUS_CREDENTIAL_ID = "nexus-creid"
-    }
-
-    tools {
-        maven 'Maven'
     }
 
     stages {
@@ -60,17 +59,14 @@ pipeline {
 
     post {
         success {
-            echo '========================================'
             echo 'BUILD SUCCESSFUL'
             echo 'WAR uploaded to Nexus successfully'
-            echo '========================================'
         }
 
         failure {
-            echo '========================================'
             echo 'BUILD FAILED'
             echo 'Check the console output'
-            echo '========================================'
         }
     }
 }
+```
