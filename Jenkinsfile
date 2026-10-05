@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label "master"
-    }
+    agent any
 
     tools {
         maven "maven-integration"
@@ -16,7 +14,6 @@ pipeline {
     }
 
     stages {
-
         stage("Clone Code") {
             steps {
                 git 'https://github.com/Zeeshancloud15/techie01.git'
@@ -33,10 +30,7 @@ pipeline {
             steps {
                 script {
                     def pom = readMavenPom file: "pom.xml"
-
-                    def filesByGlob = findFiles(
-                        glob: "target/*.${pom.packaging}"
-                    )
+                    def filesByGlob = findFiles(glob: "target/*.${pom.packaging}")
 
                     if (filesByGlob.length == 0) {
                         error "No artifact found in target directory"
@@ -44,40 +38,29 @@ pipeline {
 
                     def artifactPath = filesByGlob[0].path
 
-                    echo "Artifact: ${filesByGlob[0].name}"
-                    echo "Path: ${artifactPath}"
-                    echo "Group ID: ${pom.groupId}"
-                    echo "Artifact ID: ${pom.artifactId}"
-                    echo "Version: ${pom.version}"
-                    echo "Packaging: ${pom.packaging}"
-
-                    if (fileExists(artifactPath)) {
-                        nexusArtifactUploader(
-                            nexusVersion: NEXUS_VERSION,
-                            protocol: NEXUS_PROTOCOL,
-                            nexusUrl: NEXUS_URL,
-                            groupId: pom.groupId,
-                            version: pom.version,
-                            repository: NEXUS_REPOSITORY,
-                            credentialsId: NEXUS_CREDENTIAL_ID,
-                            artifacts: [
-                                [
-                                    artifactId: pom.artifactId,
-                                    classifier: '',
-                                    file: artifactPath,
-                                    type: pom.packaging
-                                ],
-                                [
-                                    artifactId: pom.artifactId,
-                                    classifier: '',
-                                    file: "pom.xml",
-                                    type: "pom"
-                                ]
+                    nexusArtifactUploader(
+                        nexusVersion: NEXUS_VERSION,
+                        protocol: NEXUS_PROTOCOL,
+                        nexusUrl: NEXUS_URL,
+                        groupId: pom.groupId,
+                        version: pom.version,
+                        repository: NEXUS_REPOSITORY,
+                        credentialsId: NEXUS_CREDENTIAL_ID,
+                        artifacts: [
+                            [
+                                artifactId: pom.artifactId,
+                                classifier: '',
+                                file: artifactPath,
+                                type: pom.packaging
+                            ],
+                            [
+                                artifactId: pom.artifactId,
+                                classifier: '',
+                                file: "pom.xml",
+                                type: "pom"
                             ]
-                        )
-                    } else {
-                        error "Artifact ${artifactPath} could not be found"
-                    }
+                        ]
+                    )
                 }
             }
         }
