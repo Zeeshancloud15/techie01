@@ -10,14 +10,11 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexus-creid"
     }
 
-    stages {
+    tools {
+        maven 'Maven'
+    }
 
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/Zeeshancloud15/techie01.git'
-            }
-        }
+    stages {
 
         stage('Check Java and Maven') {
             steps {
@@ -63,14 +60,17 @@ pipeline {
 
     post {
         success {
+            echo '========================================'
             echo 'BUILD SUCCESSFUL'
             echo 'WAR uploaded to Nexus successfully'
+            echo '========================================'
         }
 
         failure {
+            echo '========================================'
             echo 'BUILD FAILED'
             echo 'Check the console output'
+            echo '========================================'
         }
     }
 }
-
