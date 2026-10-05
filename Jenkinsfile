@@ -1,9 +1,7 @@
+```groovy
 pipeline {
-    agent any
 
-    tools {
-        maven "maven-integration"
-    }
+    agent any
 
     environment {
         NEXUS_VERSION = "nexus3"
@@ -13,56 +11,69 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexus-creid"
     }
 
+    tools {
+        maven 'Maven'
+        jdk 'JDK21'
+    }
+
     stages {
-        stage("Clone Code") {
+
+        stage('Checkout') {
             steps {
-                git 'https://github.com/Zeeshancloud15/techie01.git'
+                git branch: 'main',
+                    url: 'https://github.com/Zeeshancloud15/techie01.git'
             }
         }
 
-        stage("Maven Build") {
+        stage('Build') {
             steps {
-                sh 'mvn -Dmaven.test.failure.ignore=true install'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage("Publish to Nexus") {
+        stage('Test') {
             steps {
-                script {
-                    def pom = readMavenPom file: "pom.xml"
-                    def filesByGlob = findFiles(glob: "target/*.${pom.packaging}")
+                sh 'mvn test'
+            }
+        }
 
-                    if (filesByGlob.length == 0) {
-                        error "No artifact found in target directory"
-                    }
-
-                    def artifactPath = filesByGlob[0].path
-
-                    nexusArtifactUploader(
-                        nexusVersion: NEXUS_VERSION,
-                        protocol: NEXUS_PROTOCOL,
-                        nexusUrl: NEXUS_URL,
-                        groupId: pom.groupId,
-                        version: pom.version,
-                        repository: NEXUS_REPOSITORY,
-                        credentialsId: NEXUS_CREDENTIAL_ID,
-                        artifacts: [
-                            [
-                                artifactId: pom.artifactId,
-                                classifier: '',
-                                file: artifactPath,
-                                type: pom.packaging
-                            ],
-                            [
-                                artifactId: pom.artifactId,
-                                classifier: '',
-                                file: "pom.xml",
-                                type: "pom"
-                            ]
+        stage('Publish to Nexus') {
+            steps {
+                nexusArtifactUploader(
+                    nexusVersion: NEXUS_VERSION,
+                    protocol: NEXUS_PROTOCOL,
+                    nexusUrl: NEXUS_URL,
+                    groupId: 'com.javatpoint',
+                    version: '1.0-SNAPSHOT',
+                    repository: NEXUS_REPOSITORY,
+                    credentialsId: NEXUS_CREDENTIAL_ID,
+                    artifacts: [
+                        [
+                            artifactId: 'SimpleCustomerApp',
+                            classifier: '',
+                            file: 'target/SimpleCustomerApp-1.0-SNAPSHOT.war',
+                            type: 'war'
                         ]
-                    )
-                }
+                    ]
+                )
             }
         }
     }
+
+    post {
+        success {
+            echo '========================================'
+            echo 'BUILD SUCCESSFUL'
+            echo 'WAR uploaded to Nexus successfully'
+            echo '========================================'
+        }
+
+        failure {
+            echo '========================================'
+            echo 'BUILD FAILED'
+            echo 'Check the Jenkins console output'
+            echo '========================================'
+        }
+    }
 }
+```
